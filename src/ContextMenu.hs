@@ -6,6 +6,7 @@ import qualified Graphics.UI.Threepenny       as UI
 import           Graphics.UI.Threepenny.Core
 
 menuStyle = [
+        ("display",         "none"),
         ("border",          "1px solid #CCC"),
         ("background",      "#FFF"),
         ("color",           "#333"),
