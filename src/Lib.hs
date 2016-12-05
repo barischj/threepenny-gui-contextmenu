@@ -10,7 +10,7 @@ import           Graphics.UI.Threepenny.Core
 -- |TODO Show custom context menu
 -- 1. Capture contextmenu event DONE
 -- 2. Cancel event propogation
--- 3. Show html menu at mouse
+-- 3. Show html menu at mouse DONE
 -- 4. Add handler to menu to destroy self
 -- 5. Create function to add menu handler to element
 

@@ -22,7 +22,8 @@ contextMenu strings el = do
     menu' <- menu strings
     on UI.contextmenu el $ \(x, y) ->
         element menu' # set style
-            [("left", show x ++ "px"), ("top", show y ++ "px")]
+            [("left", show x ++ "px"), ("top", show y ++ "px"),
+             ("display", "block")]
     return menu'
 
 menu :: [String] -> UI Element
