@@ -15,11 +15,11 @@ menuStyle = [
         ("padding-left",    "0")
     ]
 
--- |Displays a custom context menu at the mouse on a contextmenu event.
-contextMenu :: [String] -> UI Element
-contextMenu strings = do
+-- |Displays a custom context menu on a contextmenu event.
+contextMenu :: [String] -> Element -> UI Element
+contextMenu strings el = do
     menu' <- menu strings
-    on UI.contextmenu menu' $ \(x, y) ->
+    on UI.contextmenu el $ \(x, y) ->
         element menu' # set style
             [("left", show x ++ "px"), ("top", show y ++ "px")]
     return menu'

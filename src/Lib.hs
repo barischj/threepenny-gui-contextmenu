@@ -31,7 +31,5 @@ setup window = do
     getBody window #+ [element buttonA, element buttonB]
     on UI.click buttonA $ \event ->
         element buttonA # set UI.text "I have been clicked!"
-    on UI.contextmenu buttonB $ const $
-        element buttonB # set UI.text "Context menu activated!"
-    getBody window #+ [Menu.contextMenu ["foo", "bar", "car"]]
+    getBody window #+ [Menu.contextMenu ["foo", "bar", "car"] buttonB]
     return ()
