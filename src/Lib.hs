@@ -1,37 +1,18 @@
-module Lib
-    ( run
-    ) where
+module Lib (run) where
 
 import Control.Monad
 import qualified ContextMenu as Menu
 import qualified Graphics.UI.Threepenny       as UI
 import           Graphics.UI.Threepenny.Core
 
--- |TODO Show custom context menu
--- 1. Capture contextmenu event DONE
--- 2. Cancel event propogation
--- 3. Show html menu at mouse DONE
--- 4. Add handler to menu to destroy self
--- 5. Create function to add menu handler to element
-
 -- |TODO Show client side debug messages
-
 -- |TODO Create binding between threepenny-gui and Polymer
-
--- |TODO Return entire event to Haskell.
-
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+-- |TODO Return entire event to Haskell
 
 run :: IO ()
 run = startGUI defaultConfig setup
 
 setup :: Window -> UI ()
 setup window = void $ do
-    buttonA <- UI.button # set UI.text "Click me!"
-    buttonB <- UI.button # set UI.text "Open context menu on me!"
-    getBody window #+ [element buttonA, element buttonB]
-    on UI.click buttonA $ \event ->
-        element buttonA # set UI.text "I have been clicked!"
     body <- getBody window
     Menu.contextMenu ["foo", "bar", "car"] body

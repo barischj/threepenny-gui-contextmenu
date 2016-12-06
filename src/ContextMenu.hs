@@ -30,7 +30,7 @@ rmTargetStyle = [
     ]
 
 -- |Attaches a custom context menu to an element.
-contextMenu :: [String] -> Element -> UI Element
+contextMenu :: [String] -> Element -> UI ()
 contextMenu items source = do
     rmTarget <- UI.div # set style rmTargetStyle
     menu' <- menu items
@@ -43,13 +43,13 @@ contextMenu items source = do
     -- Hide the menu when the screen is clicked elsewhere.
     on UI.mousedown rmTarget $ const $
         element menu' # set style [("display", "none")]
-    return source
+    preventDefaultContextMenu source
 
 -- |Returns a menu with given strings as menu items.
 menu :: [String] -> UI Element
 menu items = do
-    menuElem <- UI.ul # set style menuStyle
-    return menuElem #+ map menuItem items
+    menuEl <- UI.ul # set style menuStyle
+    return menuEl #+ map menuItem items
 
 -- |Returns a menu item from a string.
 menuItem :: String -> UI Element
@@ -60,3 +60,14 @@ menuItem item = do
     on UI.leave menuItem $ const $
         element menuItem # set style [("background-color", "inherit")]
     return menuItem
+
+preventDefaultClass = "__prevent-default-context-menu"
+
+-- |Prevents the default action on a contextmenu event.
+preventDefaultContextMenu :: Element -> UI ()
+preventDefaultContextMenu el = do
+    element el # set UI.class_ preventDefaultClass
+    runFunction $ ffi $ concat [
+            "$('.", preventDefaultClass,
+            "').bind('contextmenu', e => e.preventDefault())"
+        ]
