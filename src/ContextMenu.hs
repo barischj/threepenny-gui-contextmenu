@@ -11,8 +11,9 @@ menuStyle = [
         ("border-radius",   "3px"),
         ("color",           "#333"),
         ("display",         "none"),
-        ("padding-left",    "0"),
         ("list-style-type", "none"),
+        ("margin",  "0"),
+        ("padding-left",    "0"),
         ("position",        "absolute")
     ]
 
