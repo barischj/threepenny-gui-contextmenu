@@ -54,12 +54,12 @@ menu items = do
 -- |Returns a menu item from a string.
 menuItem :: String -> UI Element
 menuItem item = do
-    menuItem <- UI.li # set UI.text item # set style menuItemStyle
-    on UI.hover menuItem $ const $
-        element menuItem # set style [("background-color", "#DEF")]
-    on UI.leave menuItem $ const $
-        element menuItem # set style [("background-color", "inherit")]
-    return menuItem
+    itemEl <- UI.li # set UI.text item # set style menuItemStyle
+    on UI.hover itemEl $ const $
+        element itemEl # set style [("background-color", "#DEF")]
+    on UI.leave itemEl $ const $
+        element itemEl # set style [("background-color", "inherit")]
+    return itemEl
 
 preventDefaultClass = "__prevent-default-context-menu"
 
