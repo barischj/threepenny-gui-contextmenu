@@ -18,6 +18,8 @@ import           Graphics.UI.Threepenny.Core
 
 -- |TODO Create binding between threepenny-gui and Polymer
 
+-- |TODO Return entire event to Haskell.
+
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
 
@@ -25,11 +27,11 @@ run :: IO ()
 run = startGUI defaultConfig setup
 
 setup :: Window -> UI ()
-setup window = do
+setup window = void $ do
     buttonA <- UI.button # set UI.text "Click me!"
     buttonB <- UI.button # set UI.text "Open context menu on me!"
     getBody window #+ [element buttonA, element buttonB]
     on UI.click buttonA $ \event ->
         element buttonA # set UI.text "I have been clicked!"
-    getBody window #+ [Menu.contextMenu ["foo", "bar", "car"] buttonB]
-    return ()
+    body <- getBody window
+    Menu.contextMenu ["foo", "bar", "car"] body
