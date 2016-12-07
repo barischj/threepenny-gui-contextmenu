@@ -12,7 +12,7 @@ menuStyle = [
         ("color",           "#333"),
         ("display",         "none"),
         ("list-style-type", "none"),
-        ("margin",  "0"),
+        ("margin",          "0"),
         ("padding-left",    "0"),
         ("position",        "absolute")
     ]
@@ -68,7 +68,6 @@ preventDefaultClass = "__prevent-default-context-menu"
 preventDefaultContextMenu :: Element -> UI ()
 preventDefaultContextMenu el = do
     element el # set UI.class_ preventDefaultClass
-    runFunction $ ffi $ concat [
-            "$('.", preventDefaultClass,
-            "').bind('contextmenu', e => e.preventDefault())"
-        ]
+    runFunction $ ffi
+        "$(%1).bind('contextmenu', e => e.preventDefault())"
+        ("." ++ preventDefaultClass)

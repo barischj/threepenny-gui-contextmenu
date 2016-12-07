@@ -39,8 +39,7 @@ packages:
 - '.'
 - location:
     git: https://github.com/barischj/threepenny-gui.git
-    commit: 8b0ed0713f937c5a294b1e99709fdee5aabe2ae5
-
+    commit: 841ee2e3398c950f34f7ce7f42fc7ab0110fccef
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps:
