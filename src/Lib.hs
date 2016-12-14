@@ -24,4 +24,4 @@ setup window = void $ do
     Menu.contextMenu menuItems body
 
 colour :: Element -> String -> UI Element
-colour el string = element el # set style [("color","#CCAABB")]
+colour el string = element el # set style [("color", string)]

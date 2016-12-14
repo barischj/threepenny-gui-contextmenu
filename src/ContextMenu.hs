@@ -35,7 +35,7 @@ contextMenu :: [(String, [UI b])] -> Element -> UI ()
 contextMenu items source = do
     rmTarget <- UI.div # set style rmTargetStyle
     menu' <- menu items
-    element source #+ [UI.div #+ [element rmTarget, element menu']]
+    element source #+ [element rmTarget, element menu']
     -- Display the menu at mouse on a contextmenu event.
     on UI.contextmenu source $ \(x, y) ->
         element menu' # set style
