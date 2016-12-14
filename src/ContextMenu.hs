@@ -31,7 +31,7 @@ rmTargetStyle = [
     ]
 
 -- |Attaches a custom context menu to an element.
-contextMenu :: [String] -> Element -> UI ()
+contextMenu :: [(String, [UI b])] -> Element -> UI ()
 contextMenu items source = do
     rmTarget <- UI.div # set style rmTargetStyle
     menu' <- menu items
@@ -46,20 +46,21 @@ contextMenu items source = do
         element menu' # set style [("display", "none")]
     preventDefaultContextMenu source
 
--- |Returns a menu with given strings as menu items.
-menu :: [String] -> UI Element
+-- |Returns a menu element with given strings as menu items.
+menu :: [(String, [UI b])] -> UI Element
 menu items = do
     menuEl <- UI.ul # set style menuStyle
     return menuEl #+ map menuItem items
 
--- |Returns a menu item from a string.
-menuItem :: String -> UI Element
-menuItem item = do
+-- |Returns a menu item element from a string.
+menuItem :: (String, [UI b]) -> UI Element
+menuItem (item, f) = do
     itemEl <- UI.li # set UI.text item # set style menuItemStyle
     on UI.hover itemEl $ const $
         element itemEl # set style [("background-color", "#DEF")]
     on UI.leave itemEl $ const $
         element itemEl # set style [("background-color", "inherit")]
+    on UI.click itemEl $ const $ sequence_ f
     return itemEl
 
 preventDefaultClass = "__prevent-default-context-menu"

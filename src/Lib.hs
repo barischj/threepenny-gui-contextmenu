@@ -15,4 +15,13 @@ run = startGUI defaultConfig setup
 setup :: Window -> UI ()
 setup window = void $ do
     body <- getBody window
-    Menu.contextMenu ["foo", "bar", "car"] body
+    button <- UI.button # set UI.text "change my colour via right-click"
+    element body #+ [element button]
+    let menuItems = [
+                ("red",  [colour button "red" ]),
+                ("blue", [colour button "blue"])
+            ]
+    Menu.contextMenu menuItems body
+
+colour :: Element -> String -> UI Element
+colour el string = element el # set style [("color","#CCAABB")]
