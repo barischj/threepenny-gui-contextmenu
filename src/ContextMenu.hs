@@ -23,44 +23,62 @@ menuItemStyle = [
     ]
 
 rmTargetStyle = [
-        ("position", "absolute"),
-        ("height",   "100vh"),
+        ("height",   "0"),
         ("left",     "0"),
+        ("position", "absolute"),
         ("top",      "0"),
-        ("width",    "100vw")
+        ("width",    "0")
     ]
+
+-- TODO
+--   Close menu on menu item click.
+
+-- Summary of how the menu operates:
+--
+-- on source element right click:
+--   set rmTarget size to 100vw x 100vh
+--   set menu to display
+-- on menu item or rmTarget click:
+--   set rmTarget size to 0 x 0
+--   set menu to display none
+-- on menu item click:
+--   run UI action
 
 -- |Attaches a custom context menu to an element.
 contextMenu :: [(String, [UI b])] -> Element -> UI ()
 contextMenu items source = do
     rmTarget <- UI.div # set style rmTargetStyle
-    menu' <- menu items
-    element source #+ [element rmTarget, element menu']
+    menu <- UI.ul # set style menuStyle
+    element source #+ [element rmTarget, element menu]
+    let close = do
+            element menu     # set style [("display", "none")]
+            element rmTarget # set style [("width", "0"), ("height", "0")]
+    element menu #+ map (menuItem close) items
     -- Display the menu at mouse on a contextmenu event.
-    on UI.contextmenu source $ \(x, y) ->
-        element menu' # set style
+    on UI.contextmenu source $ \(x, y) -> do
+        liftIO $ putStrLn "context event fired"
+        element rmTarget # set style
+            [("width", "100vw"), ("height", "100vh")]
+        element menu # set style
             [("left", show x ++ "px"), ("top", show y ++ "px"),
              ("display", "block")]
     -- Hide the menu when the screen is clicked elsewhere.
-    on UI.mousedown rmTarget $ const $
-        element menu' # set style [("display", "none")]
+    on UI.mousedown rmTarget $ const $ do
+        close
+        liftIO $ putStrLn "rmTarget clicked"
     preventDefaultContextMenu source
 
--- |Returns a menu element with given strings as menu items.
-menu :: [(String, [UI b])] -> UI Element
-menu items = do
-    menuEl <- UI.ul # set style menuStyle
-    return menuEl #+ map menuItem items
-
 -- |Returns a menu item element from a string.
-menuItem :: (String, [UI b]) -> UI Element
-menuItem (item, f) = do
+menuItem :: UI a -> (String, [UI b]) -> UI Element
+menuItem close (item, f) = do
     itemEl <- UI.li # set UI.text item # set style menuItemStyle
     on UI.hover itemEl $ const $
         element itemEl # set style [("background-color", "#DEF")]
     on UI.leave itemEl $ const $
         element itemEl # set style [("background-color", "inherit")]
-    on UI.click itemEl $ const $ sequence_ f
+    on UI.click itemEl $ const $ do
+        liftIO $ putStrLn "event clicked"
+        sequence_ f
     return itemEl
 
 preventDefaultClass = "__prevent-default-context-menu"
