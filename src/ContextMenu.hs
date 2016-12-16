@@ -30,8 +30,7 @@ rmTargetStyle = [
         ("width",    "0")
     ]
 
--- TODO
---   Close menu on menu item click.
+-- TODO Nested menus 
 
 -- Summary of how the menu operates:
 --
@@ -49,23 +48,28 @@ contextMenu :: [(String, [UI b])] -> Element -> UI ()
 contextMenu items source = do
     rmTarget <- UI.div # set style rmTargetStyle
     menu <- UI.ul # set style menuStyle
-    element source #+ [element rmTarget, element menu]
-    let close = do
-            element menu     # set style [("display", "none")]
-            element rmTarget # set style [("width", "0"), ("height", "0")]
-    element menu #+ map (menuItem close) items
-    -- Display the menu at mouse on a contextmenu event.
-    on UI.contextmenu source $ \(x, y) -> do
-        liftIO $ putStrLn "context event fired"
-        element rmTarget # set style
-            [("width", "100vw"), ("height", "100vh")]
-        element menu # set style
+    -- Define functions to open and close menu.
+    let openMenu x y = do
+          element menu # set style
             [("left", show x ++ "px"), ("top", show y ++ "px"),
              ("display", "block")]
-    -- Hide the menu when the screen is clicked elsewhere.
+          element rmTarget # set style
+            [("width", "100vw"), ("height", "100vh")]
+        closeMenu = do
+          element menu     # set style [("display", "none")]
+          element rmTarget # set style [("width", "0"), ("height", "0")]
+    -- Add menu items to the menu.
+    element menu #+ map (menuItem closeMenu) items
+    -- Display menu on a contextmenu event.
+    on UI.contextmenu source $ \(x, y) -> do
+      liftIO $ putStrLn "context event fired"
+    -- Hide menu on rmTarget click.
     on UI.mousedown rmTarget $ const $ do
-        close
-        liftIO $ putStrLn "rmTarget clicked"
+      closeMenu
+      liftIO $ putStrLn "rmTarget clicked"
+    -- Add elements to the given element.
+    element source #+ [element rmTarget, element menu]
+    -- Prevent the default context menu.
     preventDefaultContextMenu source
 
 -- |Returns a menu item element from a string.
