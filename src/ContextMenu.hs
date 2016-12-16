@@ -77,6 +77,7 @@ menuItem close (item, f) = do
     on UI.leave itemEl $ const $
         element itemEl # set style [("background-color", "inherit")]
     on UI.click itemEl $ const $ do
+        close
         liftIO $ putStrLn "event clicked"
         sequence_ f
     return itemEl
