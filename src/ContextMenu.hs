@@ -88,7 +88,15 @@ contextMenu items source = do
     -- Prevent the default context menu.
     preventDefaultContextMenu source
 
--- |Returns a menu item element from a string.
+-- |Returns a menu and function to hide it.
+newMenu :: [MenuItem a] -> UI (Element, UI Element)
+newMenu items = do
+  menuEl <- UI.li # set style menuStyle
+  element menuEl #+ map (menuItem $ return ()) items
+  let close = element menuEl # set style [("display", "none")]
+  return (menuEl, close)
+
+-- |Returns a menu item element and potentially a function to close a submenu.
 menuItem :: UI a -> MenuItem b -> UI Element
 menuItem close (MenuItem text value) = do
     itemEl <- UI.li # set UI.text text # set style menuItemStyle
@@ -102,6 +110,9 @@ menuItem close (MenuItem text value) = do
           close
           liftIO $ putStrLn "event clicked"
           sequence_ f
+      MoreMenuItems lm -> do
+        subMenu <- newMenu lm
+        return ()
     return itemEl
 
 preventDefaultClass = "__prevent-default-context-menu"
