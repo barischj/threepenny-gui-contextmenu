@@ -1,4 +1,4 @@
-module ContextMenu (contextMenu) where
+module ContextMenu where
 
 import qualified Graphics.UI.Threepenny       as UI
 import           Graphics.UI.Threepenny.Core
@@ -43,8 +43,23 @@ rmTargetStyle = [
 -- on menu item click:
 --   run UI action
 
+-- Menu items are either:
+--   a string and [UI a]
+--     - on click close menu and run UI actions
+--   a string and [MenuItem]
+--     - on hover:
+--       - 
+
+data MenuItem a = MenuItem { aText :: String, aValue :: MenuItemValue a }
+
+data MenuItemValue a = MenuItemActions [UI a] | MoreMenuItems [MenuItem a]
+
+actionMenuItem :: String -> [UI a] -> MenuItem a
+actionMenuItem text actions =
+  MenuItem { aText = text, aValue = MenuItemActions actions }
+
 -- |Attaches a custom context menu to an element.
-contextMenu :: [(String, [UI b])] -> Element -> UI ()
+contextMenu :: [MenuItem a] -> Element -> UI ()
 contextMenu items source = do
     rmTarget <- UI.div # set style rmTargetStyle
     menu <- UI.ul # set style menuStyle
@@ -74,17 +89,19 @@ contextMenu items source = do
     preventDefaultContextMenu source
 
 -- |Returns a menu item element from a string.
-menuItem :: UI a -> (String, [UI b]) -> UI Element
-menuItem close (item, f) = do
-    itemEl <- UI.li # set UI.text item # set style menuItemStyle
+menuItem :: UI a -> MenuItem b -> UI Element
+menuItem close (MenuItem text value) = do
+    itemEl <- UI.li # set UI.text text # set style menuItemStyle
     on UI.hover itemEl $ const $
         element itemEl # set style [("background-color", "#DEF")]
     on UI.leave itemEl $ const $
         element itemEl # set style [("background-color", "inherit")]
-    on UI.click itemEl $ const $ do
-        close
-        liftIO $ putStrLn "event clicked"
-        sequence_ f
+    case value of
+      MenuItemActions f ->
+        on UI.click itemEl $ const $ do
+          close
+          liftIO $ putStrLn "event clicked"
+          sequence_ f
     return itemEl
 
 preventDefaultClass = "__prevent-default-context-menu"

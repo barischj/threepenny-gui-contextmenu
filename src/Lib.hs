@@ -16,12 +16,16 @@ setup :: Window -> UI ()
 setup window = void $ do
     body <- getBody window
     button <- UI.button # set UI.text "change my colour via right-click"
+    Menu.contextMenu (exampleMenu button) body
     element body #+ [element button]
-    let menuItems = [
-                ("red",  [colour button "red" ]),
-                ("blue", [colour button "blue"])
-            ]
-    Menu.contextMenu menuItems body
 
+-- |Sets an element's colour to the given string.
 colour :: Element -> String -> UI Element
 colour el string = element el # set style [("color", string)]
+
+-- |An example menu that changes an element red or blue.
+exampleMenu :: Element -> [Menu.MenuItem Element]
+exampleMenu el = [
+    Menu.actionMenuItem "red"   [colour el "red" ],
+    Menu.actionMenuItem "blue"  [colour el "blue"]
+  ]
