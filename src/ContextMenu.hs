@@ -1,6 +1,4 @@
-module ContextMenu (
-    contextMenu
-    ) where
+module ContextMenu (contextMenu) where
 
 import qualified Graphics.UI.Threepenny       as UI
 import           Graphics.UI.Threepenny.Core
@@ -30,7 +28,9 @@ rmTargetStyle = [
         ("width",    "0")
     ]
 
--- TODO Nested menus 
+-- TODO
+--   Nested menus 
+--   2 space indentation
 
 -- Summary of how the menu operates:
 --
@@ -48,8 +48,8 @@ contextMenu :: [(String, [UI b])] -> Element -> UI ()
 contextMenu items source = do
     rmTarget <- UI.div # set style rmTargetStyle
     menu <- UI.ul # set style menuStyle
-    -- Define functions to open and close menu.
-    let openMenu x y = do
+    -- Define functions to open and close the menu.
+    let openMenu (x, y) = do
           element menu # set style
             [("left", show x ++ "px"), ("top", show y ++ "px"),
              ("display", "block")]
@@ -63,6 +63,7 @@ contextMenu items source = do
     -- Display menu on a contextmenu event.
     on UI.contextmenu source $ \(x, y) -> do
       liftIO $ putStrLn "context event fired"
+      openMenu (x, y)
     -- Hide menu on rmTarget click.
     on UI.mousedown rmTarget $ const $ do
       closeMenu
