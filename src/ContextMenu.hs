@@ -111,7 +111,7 @@ menuItem close (MenuItem text value) = do
           liftIO $ putStrLn "event clicked"
           sequence_ f
       MoreMenuItems lm -> do
-        subMenu <- newMenu lm
+        (subMenu, closeMenu) <- newMenu lm
         return ()
     return itemEl
 
