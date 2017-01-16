@@ -5,7 +5,7 @@ import           Control.Monad
 import qualified Graphics.UI.Threepenny      as UI
 import           Graphics.UI.Threepenny.Core
 
--- | Runs the example with defaultConfig.
+-- | Runs the example.
 run :: IO ()
 run = startGUI defaultConfig example
 
@@ -20,9 +20,9 @@ example window = void $ do
 -- | Menu items to change an element red or blue.
 menuItems :: Element -> [Menu.MenuItem Element]
 menuItems el = [
-    Menu.actionMenuItem "red"   [colour el "red" ],
-    Menu.actionMenuItem "blue"  [colour el "blue"]
-  ]
+      Menu.actionMenuItem "red"   [colour el "red" ],
+      Menu.actionMenuItem "blue"  [colour el "blue"]
+    ]
 
 -- | Sets an element's colour to the given string.
 colour :: Element -> String -> UI Element

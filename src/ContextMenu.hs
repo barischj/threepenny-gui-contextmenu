@@ -1,8 +1,9 @@
 module ContextMenu where
 
-import qualified Graphics.UI.Threepenny       as UI
+import qualified Graphics.UI.Threepenny      as UI
 import           Graphics.UI.Threepenny.Core
 
+-- | Default style for the context menu.
 menuStyle = [
         ("background",      "#FFF"),
         ("border",          "1px solid #CCC"),
@@ -15,11 +16,13 @@ menuStyle = [
         ("position",        "absolute")
     ]
 
+-- | Default style for any menu items.
 menuItemStyle = [
         ("cursor",  "pointer"),
         ("padding", "8px 12px")
     ]
 
+-- | Full-screen transparent target to close the menu.
 rmTargetStyle = [
         ("height",   "0"),
         ("left",     "0"),
@@ -28,9 +31,7 @@ rmTargetStyle = [
         ("width",    "0")
     ]
 
--- TODO
---   Nested menus 
---   2 space indentation
+--   Nested menus
 
 -- Summary of how the menu operates:
 --
@@ -48,7 +49,7 @@ rmTargetStyle = [
 --     - on click close menu and run UI actions
 --   a string and [MenuItem]
 --     - on hover:
---       - 
+--       -
 
 data MenuItem a = MenuItem { aText :: String, aValue :: MenuItemValue a }
 
@@ -115,9 +116,11 @@ menuItem close (MenuItem text value) = do
         return ()
     return itemEl
 
+-- | CSS class used to identify elements on which to prevent default context
+--   menus from opening.
 preventDefaultClass = "__prevent-default-context-menu"
 
--- |Prevents the default action on a contextmenu event.
+-- | Prevents a default context menu from opening from the given element.
 preventDefaultContextMenu :: Element -> UI ()
 preventDefaultContextMenu el = do
     element el # set UI.class_ preventDefaultClass
