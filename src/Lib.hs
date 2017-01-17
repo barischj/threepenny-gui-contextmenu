@@ -20,8 +20,10 @@ example window = void $ do
 -- | Menu items to change an element red or blue.
 menuItems :: Element -> [Menu.MenuItem Element]
 menuItems el = [
-      Menu.actionMenuItem "red"   [colour el "red" ],
-      Menu.actionMenuItem "blue"  [colour el "blue"]
+        Menu.actionMenuItem "red"   [colour el "red" ],
+        Menu.actionMenuItem "blue"  [colour el "blue"],
+        Menu.nestedMenuItem "more"
+            [Menu.actionMenuItem "green" [colour el "green"]]
     ]
 
 -- | Sets an element's colour to the given string.

@@ -31,39 +31,28 @@ rmTargetStyle = [
         ("width",    "0")
     ]
 
---   Nested menus
+-- | A menu item is some text to be displayed and either UI actions to execute
+--   or a nested menu.
+data MenuItem a = MenuItem { mIText :: String, mIValue :: MenuItemValue a }
+data MenuItemValue a = MenuItemActions [UI a] | NestedMenu [MenuItem a]
 
--- Summary of how the menu operates:
---
--- on source element right click:
---   set rmTarget size to 100vw x 100vh
---   set menu to display
--- on menu item or rmTarget click:
---   set rmTarget size to 0 x 0
---   set menu to display none
--- on menu item click:
---   run UI action
-
--- Menu items are either:
---   a string and [UI a]
---     - on click close menu and run UI actions
---   a string and [MenuItem]
---     - on hover:
---       -
-
-data MenuItem a = MenuItem { aText :: String, aValue :: MenuItemValue a }
-
-data MenuItemValue a = MenuItemActions [UI a] | MoreMenuItems [MenuItem a]
-
+-- | Constructor for a menu item that contains UI actions to execute.
 actionMenuItem :: String -> [UI a] -> MenuItem a
 actionMenuItem text actions =
-  MenuItem { aText = text, aValue = MenuItemActions actions }
+    MenuItem { mIText = text, mIValue = MenuItemActions actions }
 
--- |Attaches a custom context menu to an element.
+-- | Constructor for a menu item that contains a nested menu.
+nestedMenuItem :: String -> [MenuItem a] -> MenuItem a
+nestedMenuItem text nested =
+    MenuItem { mIText = text ++ "  ›", mIValue = NestedMenu nested }
+
+-- | Attaches a custom context menu to an element.
 contextMenu :: [MenuItem a] -> Element -> UI ()
 contextMenu items source = do
-    rmTarget <- UI.div # set style rmTargetStyle
-    menu <- UI.ul # set style menuStyle
+    rmTarget      <- UI.div # set style rmTargetStyle
+    let closeRMTarget = 
+          element rmTarget # set style [("width", "0"), ("height", "0")]
+    (menu, close) <- newMenu closeRMTarget items
     -- Define functions to open and close the menu.
     let openMenu (x, y) = do
           element menu # set style
@@ -73,9 +62,8 @@ contextMenu items source = do
             [("width", "100vw"), ("height", "100vh")]
         closeMenu = do
           element menu     # set style [("display", "none")]
-          element rmTarget # set style [("width", "0"), ("height", "0")]
     -- Add menu items to the menu.
-    element menu #+ map (menuItem closeMenu) items
+    -- element menu #+ map (menuItem closeMenu) items
     -- Display menu on a contextmenu event.
     on UI.contextmenu source $ \(x, y) -> do
       liftIO $ putStrLn "context event fired"
@@ -89,38 +77,55 @@ contextMenu items source = do
     -- Prevent the default context menu.
     preventDefaultContextMenu source
 
--- |Returns a menu and function to hide it.
-newMenu :: [MenuItem a] -> UI (Element, UI Element)
-newMenu items = do
-  menuEl <- UI.li # set style menuStyle
-  element menuEl #+ map (menuItem $ return ()) items
-  let close = element menuEl # set style [("display", "none")]
-  return (menuEl, close)
+-- | Returns a menu element and a function to close it.
+newMenu :: UI Element -> [MenuItem a] -> UI (Element, UI Element)
+newMenu closeParent menuItems = do
+    -- Create a blank menu and function to close it.
+    menuEl <- UI.li # set style menuStyle
+    let close = element menuEl # set style [("display", "none")]
+    -- Append all menu items to the menu.
+    menuItemEls <- mapM (menuItem close) menuItems
+    element menuEl #+ map element menuItemEls
+    return (menuEl, close)
 
 -- |Returns a menu item element and potentially a function to close a submenu.
-menuItem :: UI a -> MenuItem b -> UI Element
-menuItem close (MenuItem text value) = do
-    itemEl <- UI.li # set UI.text text # set style menuItemStyle
-    on UI.hover itemEl $ const $
-        element itemEl # set style [("background-color", "#DEF")]
-    on UI.leave itemEl $ const $
-        element itemEl # set style [("background-color", "inherit")]
+menuItem :: UI Element -> MenuItem a -> UI Element
+menuItem closeRoot (MenuItem text value) = do
+    menuItemEl <- UI.li # set UI.text text # set style menuItemStyle
+    -- Change menu item appearance on hover.
+    whileHover menuItemEl 
+        (element menuItemEl # set style [("background-color", "#DEF"   )])
+        (element menuItemEl # set style [("background-color", "inherit")])
     case value of
-      MenuItemActions f ->
-        on UI.click itemEl $ const $ do
-          close
-          liftIO $ putStrLn "event clicked"
-          sequence_ f
-      MoreMenuItems lm -> do
-        (subMenu, closeMenu) <- newMenu lm
-        return ()
-    return itemEl
+        -- On click of menu item with actions, execute the actions and close
+        -- the entire menu.
+        MenuItemActions actions ->
+            on UI.click menuItemEl $ const $ do
+                closeRoot
+                liftIO $ putStrLn "event clicked"
+                sequence_ actions
+        -- On hover over menu item with nested menu, display the nested menu.
+        NestedMenu nestedMenuItems -> do
+            (nestedMenuEl, closeNested) <- newMenu closeRoot nestedMenuItems
+            element menuItemEl #+ [element nestedMenuEl]
+            on UI.hover menuItemEl $ const $
+                element nestedMenuEl # set style [("display", "block")]
+            -- whileHover nestedMenuEl openNested closeNested
+        -- (subMenu, closeMenu) <- newMenu lm
+            return ()
+    return menuItemEl
 
--- | CSS class used to identify elements on which to prevent default context
---   menus from opening.
+-- | Execute one action on hover and another on leave.
+whileHover :: Element -> UI a -> UI b -> UI ()
+whileHover el onHover onLeave = do
+    on UI.hover el $ const onHover
+    on UI.leave el $ const onLeave
+
+-- | CSS class used to identify elements on which to prevent a default context
+--   menu from opening.
 preventDefaultClass = "__prevent-default-context-menu"
 
--- | Prevents a default context menu from opening from the given element.
+-- | Prevents a default context menu opening from the given element.
 preventDefaultContextMenu :: Element -> UI ()
 preventDefaultContextMenu el = do
     element el # set UI.class_ preventDefaultClass
