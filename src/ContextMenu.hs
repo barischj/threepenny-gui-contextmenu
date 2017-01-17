@@ -1,5 +1,7 @@
 module ContextMenu where
 
+import           Control.Monad               (msum, when)
+import           Data.Maybe                  (catMaybes)
 import qualified Graphics.UI.Threepenny      as UI
 import           Graphics.UI.Threepenny.Core
 
@@ -31,6 +33,8 @@ rmTargetStyle = [
         ("width",    "0")
     ]
 
+type Action = UI Element
+
 -- | A menu item is some text to be displayed and either UI actions to execute
 --   or a nested menu.
 data MenuItem a = MenuItem { mIText :: String, mIValue :: MenuItemValue a }
@@ -50,7 +54,7 @@ nestedMenuItem text nested =
 contextMenu :: [MenuItem a] -> Element -> UI ()
 contextMenu items source = do
     rmTarget      <- UI.div # set style rmTargetStyle
-    let closeRMTarget = 
+    let closeRMTarget =
           element rmTarget # set style [("width", "0"), ("height", "0")]
     (menu, close) <- newMenu closeRMTarget items
     -- Define functions to open and close the menu.
@@ -78,45 +82,64 @@ contextMenu items source = do
     preventDefaultContextMenu source
 
 -- | Returns a menu element and a function to close it.
-newMenu :: UI Element -> [MenuItem a] -> UI (Element, UI Element)
-newMenu closeParent menuItems = do
+newMenu :: Action -> [MenuItem a] -> UI (Element, [Action])
+newMenu closeAbove menuItems = do
     -- Create a blank menu and function to close it.
     menuEl <- UI.li # set style menuStyle
-    let close = element menuEl # set style [("display", "none")]
+    let closeMenu = element menuEl # set style [("display", "none")]
+    -- Menu items as elements and respective list of actions to close nested
+    -- menus. :: UI [(Element, [Action])]
+    tuples <- mapM (menuItem closeMenu) menuItems 
     -- Append all menu items to the menu.
-    menuItemEls <- mapM (menuItem close) menuItems
-    element menuEl #+ map element menuItemEls
-    return (menuEl, close)
+    element menuEl #+ map (element . fst) tuples
+    -- :: [((Element, [Action]), Integer)]
+    let indexedCloseNested = zip tuples [1..]
+        -- On hover over a menu item we want close any nested menus from
+        -- *other* menu items. To do this we map the following function over
+        -- all menu items. This function takes an element from the list and
+        -- when it is hovered over will run the close actions of all *other*
+        -- menu items.
+        closeOtherMenusOnHover ((el1, _), index1) =
+            on UI.hover el1 $ const $ do
+                let closeIfNotSelf ((_, actions2), index2) =
+                      when (index1 /= index2) (sequence_ actions2)
+                mapM closeIfNotSelf indexedCloseNested
+    mapM closeOtherMenusOnHover indexedCloseNested
+    return (menuEl, [closeMenu] ++ concat (map snd tuples))
 
--- |Returns a menu item element and potentially a function to close a submenu.
-menuItem :: UI Element -> MenuItem a -> UI Element
+-- | Returns a menu item element and actions to close a nested menu.
+menuItem :: Action -> MenuItem a -> UI (Element, [Action])
 menuItem closeRoot (MenuItem text value) = do
     menuItemEl <- UI.li # set UI.text text # set style menuItemStyle
-    -- Change menu item appearance on hover.
-    whileHover menuItemEl 
-        (element menuItemEl # set style [("background-color", "#DEF"   )])
-        (element menuItemEl # set style [("background-color", "inherit")])
+    highlightWhileHover menuItemEl
     case value of
-        -- On click of menu item with actions, execute the actions and close
-        -- the entire menu.
-        MenuItemActions actions ->
+        MenuItemActions actions -> do
+            -- On click execute the actions and close the entire menu.
             on UI.click menuItemEl $ const $ do
                 closeRoot
                 liftIO $ putStrLn "event clicked"
                 sequence_ actions
-        -- On hover over menu item with nested menu, display the nested menu.
+            return (menuItemEl, [])
         NestedMenu nestedMenuItems -> do
             (nestedMenuEl, closeNested) <- newMenu closeRoot nestedMenuItems
             element menuItemEl #+ [element nestedMenuEl]
+            -- On hover display the nested menu.
             on UI.hover menuItemEl $ const $
                 element nestedMenuEl # set style [("display", "block")]
-            -- whileHover nestedMenuEl openNested closeNested
-        -- (subMenu, closeMenu) <- newMenu lm
-            return ()
-    return menuItemEl
+            return (menuItemEl, closeNested)
+
+-- | A little bit of gymastics to restructure the given data.
+extract :: [(Element, Maybe [Action])] -> UI ([Element], [Action])
+extract tuples = return (map fst tuples, concat $ catMaybes $ map snd tuples)
+
+-- | Highlights an element while being hovered over.
+highlightWhileHover :: Element -> UI ()
+highlightWhileHover el = whileHover el
+    (element el # set style [("background-color", "#DEF"   )])
+    (element el # set style [("background-color", "inherit")])
 
 -- | Execute one action on hover and another on leave.
-whileHover :: Element -> UI a -> UI b -> UI ()
+whileHover :: Element -> Action -> Action -> UI ()
 whileHover el onHover onLeave = do
     on UI.hover el $ const onHover
     on UI.leave el $ const onLeave
@@ -129,6 +152,5 @@ preventDefaultClass = "__prevent-default-context-menu"
 preventDefaultContextMenu :: Element -> UI ()
 preventDefaultContextMenu el = do
     element el # set UI.class_ preventDefaultClass
-    runFunction $ ffi
-        "$(%1).bind('contextmenu', e => e.preventDefault())"
-        ("." ++ preventDefaultClass)
+    runFunction $ ffi "$(%1).bind('contextmenu', e => e.preventDefault())"
+                      ("." ++ preventDefaultClass)
