@@ -22,8 +22,13 @@ menuItems :: Element -> [Menu.MenuItem Element]
 menuItems el = [
         Menu.actionMenuItem "red"   [colour el "red" ],
         Menu.actionMenuItem "blue"  [colour el "blue"],
-        Menu.nestedMenuItem "more"
-            [Menu.actionMenuItem "green" [colour el "green"]]
+        Menu.nestedMenuItem "more" [
+                Menu.actionMenuItem "green" [colour el "green"],
+                Menu.nestedMenuItem "even more" [
+                    Menu.actionMenuItem "red"   [colour el "red" ],
+                    Menu.actionMenuItem "blue"  [colour el "blue"]
+                ]
+            ]
     ]
 
 -- | Sets an element's colour to the given string.

@@ -15,7 +15,7 @@
 # resolver:
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
-resolver: lts-7.10
+resolver: lts-7.16
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -37,6 +37,9 @@ resolver: lts-7.10
 # will not be run. This is useful for tweaking upstream packages.
 packages:
 - '.'
+- location:
+    git: https://github.com/HeinrichApfelmus/threepenny-gui
+    commit: HEAD
 
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
