@@ -27,6 +27,10 @@ menuItems el = [
                 Menu.nestedMenuItem "even more" [
                     Menu.actionMenuItem "red"   [colour el "red" ],
                     Menu.actionMenuItem "blue"  [colour el "blue"]
+                ],
+                Menu.nestedMenuItem "even more" [
+                    Menu.actionMenuItem "red"   [colour el "red" ],
+                    Menu.actionMenuItem "blue"  [colour el "blue"]
                 ]
             ]
     ]

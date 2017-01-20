@@ -38,7 +38,7 @@ resolver: lts-7.16
 packages:
 - '.'
 - location:
-    git: https://github.com/HeinrichApfelmus/threepenny-gui
+    git: https://github.com/barischj/threepenny-gui
     commit: HEAD
 
 # Dependency packages to be pulled from upstream that are not in the resolver
