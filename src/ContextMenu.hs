@@ -77,17 +77,15 @@ menuItem closeAbove (MenuItem text value) = do
     highlightWhileHover menuItemEl
     case value of
         MenuItemActions actions -> do
-            -- On click execute the actions and close the entire menu.
-            on UI.click menuItemEl $ const $ do
-                sequence_ $ closeAbove ++ actions
-                liftIO $ putStrLn "event clicked"
+            -- On click close the entire menu and execute the actions.
+            on UI.click menuItemEl $ const $ sequence $ closeAbove ++ actions
             return (menuItemEl, [])
         NestedMenu nestedMenuItems -> do
             (nestedMenuEl, closeMenu, closeNestedMenu)
                  <- newMenu closeAbove nestedMenuItems
             -- Position a nested menu relative to this menu item.
-            element menuItemEl # set UI.position "relative"
-            element nestedMenuEl # set UI.position "absolute" # set UI.right "0px" # set UI.top "0px"
+            -- element menuItemEl # set UI.position "relative"
+            -- element nestedMenuEl # set UI.position "absolute" # set UI.right "0px" # set UI.top "0px"
             element menuItemEl #+ [element nestedMenuEl]
             -- On hover display the nested menu.
             on UI.hover menuItemEl $ const $ display "block" nestedMenuEl

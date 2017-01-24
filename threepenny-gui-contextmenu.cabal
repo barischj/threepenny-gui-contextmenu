@@ -1,5 +1,6 @@
 name:                threepenny-gui-contextmenu
 version:             0.1.0.0
+synopsis:            Write simple nested context menus for threepenny-gui.
 description:         Please see README.md
 homepage:            https://github.com/barischj/threepenny-gui-contextmenu#readme
 license:             BSD3
@@ -9,6 +10,7 @@ maintainer:          example@example.com
 copyright:           2016 Jeremy Barisch-Rooney
 category:            Web
 build-type:          Simple
+extra-source-files:  README.md
 cabal-version:       >=1.10
 
 library
