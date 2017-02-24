@@ -26,19 +26,10 @@ nestedMenuItem :: String -> [MenuItem a] -> MenuItem a
 nestedMenuItem text nested =
     MenuItem { mIText = text ++ "  ›", mIValue = NestedMenu nested }
 
--- |Creates a custom context menu and attaches it to the HTML body. Prevents
--- the default context menu from occuring.
+-- |Creates a custom context menu, activated from the given source element and
+-- attached to the HTML body. Prevents the default context menu from occuring.
 contextMenu :: [MenuItem a] -> Element -> UI ()
 contextMenu items sourceEl = do
-    contextMenuEl <- contextMenu' items sourceEl
-    body <- askWindow >>= getBody
-    element body #+ [element contextMenuEl]
-    preventDefaultContextMenu sourceEl
-
--- |Returns a custom context menu which is activated from the given source
--- element.
-contextMenu' :: [MenuItem a] -> Element -> UI Element
-contextMenu' items sourceEl = do
     rmTargetEl <- UI.div # set style rmTargetStyle
     let closeRmTarget = dimensions "0" "0" rmTargetEl
     (menuEl, closeMenu, closeNestedMenus) <- newMenu [closeRmTarget] items
@@ -50,8 +41,12 @@ contextMenu' items sourceEl = do
         closeRmTarget >> closeMenu >> sequence closeNestedMenus
     -- Hide nested menus on hover over rmTarget.
     on UI.hover rmTargetEl $ const $ sequence closeNestedMenus
-    UI.div #+ [element rmTargetEl, element menuEl]
-           # set UI.style [("z-index", "10000")]
+    -- Attach everything to the body, with a large z-index.
+    parent <- UI.div #+ [element rmTargetEl, element menuEl]
+                     # set UI.style [("z-index", "10000"),
+                                     ("position", "absolute")]
+    (askWindow >>= getBody) #+ [element parent]
+    preventDefaultContextMenu sourceEl
 
 -- |Returns a menu element, an action to close the menu and actions to close any
 -- nested menus.
