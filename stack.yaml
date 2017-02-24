@@ -3,8 +3,8 @@ resolver: lts-8.2
 packages:
 - '.'
 - location:
-    git: https://github.com/HeinrichApfelmus/threepenny-gui
-    commit: HEAD
+    git: https://github.com/barischj/threepenny-gui
+    commit: a676e3364fe1547028540417aad4e92a75fa63b6
   extra-dep: true
 
 extra-deps: []
