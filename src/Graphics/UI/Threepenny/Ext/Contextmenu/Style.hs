@@ -1,4 +1,4 @@
-module ContextMenu.Style where
+module Graphics.UI.Threepenny.Ext.Contextmenu.Style where
 
 -- |Default style for the context menu.
 menuStyle = [

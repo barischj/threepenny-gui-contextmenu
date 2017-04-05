@@ -1,4 +1,4 @@
-module ContextMenu.Util where
+module Graphics.UI.Threepenny.Ext.Contextmenu.Util where
 
 import           Data.Maybe                  (catMaybes)
 import qualified Graphics.UI.Threepenny      as UI

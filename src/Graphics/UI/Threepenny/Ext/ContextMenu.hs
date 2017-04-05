@@ -3,13 +3,13 @@
 -- time of writing the spec is only a recommendation and only implemented by
 -- Mozilla Firefox.
 
-module ContextMenu where
+module Graphics.UI.Threepenny.Ext.Contextmenu where
 
-import           ContextMenu.Style
-import           ContextMenu.Util
-import           Control.Monad               (when)
-import qualified Graphics.UI.Threepenny      as UI
+import           Control.Monad                                (when)
+import qualified Graphics.UI.Threepenny                       as UI
 import           Graphics.UI.Threepenny.Core
+import           Graphics.UI.Threepenny.Ext.Contextmenu.Style
+import           Graphics.UI.Threepenny.Ext.Contextmenu.Util
 
 -- |A menu item is some text to be displayed and either UI actions to execute or
 -- a nested menu.
@@ -105,3 +105,4 @@ preventDefaultContextMenu el = do
     element el # set UI.class_ preventDefaultClass
     runFunction $ ffi "$(%1).bind('contextmenu', e => e.preventDefault())"
                       ("." ++ preventDefaultClass)
+
