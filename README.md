@@ -12,7 +12,7 @@ and a list of the UI actions to run.
 actionMenuItem "red" []
 ```
 
-For the constructor of a menu item with another nested menu item you need to
+For the constructor of a menu item containing a nested menu item you need to
 provide a title and a list of menu items.
 
 ``` haskell
