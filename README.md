@@ -16,10 +16,11 @@ For the constructor of a menu item with another nested menu item you need to
 provide a title and a list of menu items.
 
 ``` haskell
-ourMenuItems = 
-  nestedMenuItem "more" [
-    actionMenuItem "red"  []
-  , actionMenuItem "blue" []
+ourMenuItems = [
+    nestedMenuItem "more" [
+      actionMenuItem "red"  []
+    , actionMenuItem "blue" []
+    ]
   ]
 ```
 
